@@ -37,6 +37,7 @@ app.createMarkers = function(map) {
       title: app.mapData.locations[i].name
     });
     markers.push(marker);
+    $('.locations').append('<div>' + marker.title + '</div>');
   }
 
   // Use only 1 instance of InfoWindow
@@ -69,3 +70,20 @@ app.initMap = function() {
   }
   map.fitBounds(markerBounds);
 };
+
+// Init menu icon when document DOM is ready.
+$(document).ready(function() {
+  var menu = document.querySelector('#menu');
+  var body = document.querySelector('body');
+  var drawer = document.querySelector('.nav');
+
+  // Opens when hamburger icon is clicked.
+  menu.addEventListener('click', function(e) {
+    drawer.classList.toggle('open');
+    e.stopPropagation();
+  });
+  // Closes when any part of 'body' is clicked.
+  body.addEventListener('click', function() {
+    drawer.classList.remove('open');
+  });
+});

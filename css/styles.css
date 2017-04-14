@@ -1,0 +1,50 @@
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%; margin: 0; padding: 0;
+}
+
+header {
+  background-color: 7f7f7f;
+}
+
+header {
+  text-align: right;
+}
+
+svg.hamburger {
+  width: 48px;
+  height: 48px;
+  fill: #e0e0e0;
+}
+
+.nav {
+  z-index: 10;
+  background-color: #ffffff; /* Computed value is black. Best set this. */
+  max-width: 80vw;
+
+  /* Default 'top' and 'left' as per 'static': right below header, and 0. */
+  position: absolute;
+
+  transform: translate(-300px, 0);
+  transition: transform 0.3s ease;
+}
+.nav.open {
+  transform: translate(0, 0);
+}
+.locations {
+  overflow: scroll;
+  max-height: 80vh;
+}
+.locations div {
+  border-bottom: 1px solid #ffffff; /* Separator. */
+  color: white;
+  background-color: black;
+  width: 100%;
+  text-align: left;
+  padding: 1em 1em;
+}
+
+#map { height: 100%; }

@@ -20,6 +20,41 @@ svg.hamburger {
   fill: #e0e0e0;
 }
 
+svg.filter {
+  display: inline;
+  max-width: 20px;
+  height: 100%;
+  vertical-align: middle;
+  fill: white;
+}
+
+div.location_filter {
+  height: 48px;
+  border: 1px solid #406da0;
+}
+
+input {
+  display: block;
+  float: left;
+  font-size: 1em;
+  height: 100%;
+  width: 70%;
+  border: none;
+  padding: 0 1em;
+}
+
+button {
+  display: block;
+  float: right;
+  height: 100%;
+  width: 30%;
+  font-size: 1em;
+  border: 0;
+  padding: 0;
+  background: linear-gradient(#5687c2, #406da0);
+  color: white;
+}
+
 .nav {
   z-index: 10;
   background-color: #ffffff; /* Computed value is black. Best set this. */

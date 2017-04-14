@@ -83,7 +83,10 @@ $(document).ready(function() {
     e.stopPropagation();
   });
   // Closes when any part of 'body' is clicked.
-  body.addEventListener('click', function() {
-    drawer.classList.remove('open');
+  body.addEventListener('click', function(e) {
+    if (e.target != document.querySelector('input.location_filter') &&
+        e.target != document.querySelector('button.location_filter') &&
+        e.target.parentNode != document.querySelector('div.locations'))
+      drawer.classList.remove('open');
   });
 });

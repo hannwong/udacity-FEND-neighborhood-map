@@ -82,6 +82,10 @@ button {
   padding: 1em 1em;
 }
 
+.locations div.selected {
+  background-color: gray;
+}
+
 .locations div.hidden {
   display: none;
 }

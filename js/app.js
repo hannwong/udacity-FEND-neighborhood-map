@@ -29,6 +29,8 @@ app.mapData = {
 };
 
 app.markers = [];
+app.markerSelected = null; // Google Maps marker
+app.locationSelected = null; // DOM element
 
 app.createMarkers = function(map) {
   var markers = app.markers = [];
@@ -39,7 +41,9 @@ app.createMarkers = function(map) {
       title: app.mapData.locations[i].name
     });
     markers.push(marker);
-    $('.locations').append('<div>' + marker.title + '</div>');
+    $('.locations').append(
+      '<div data-bind="click: locationClicked.bind($data, ' + i + ')">' +
+        marker.title + '</div>');
   }
 
   // Use only 1 instance of InfoWindow
@@ -50,8 +54,15 @@ app.createMarkers = function(map) {
   for (var i = 0; i < markers.length; i++) {
     (function(infoWindow, marker, map) {
       marker.addListener('click', function() {
+        // Stop animation for last selected marker.
+        if (app.markerSelected != null &&
+            app.markerSelected != marker) {
+          app.markerSelected.setAnimation(null);
+        }
+        app.markerSelected = marker;
         infoWindow.setContent(marker.title);
         infoWindow.open(map, marker);
+        marker.setAnimation(google.maps.Animation.BOUNCE);
       });
     })(infoWindow, markers[i], map);
   }
@@ -71,6 +82,9 @@ app.initMap = function() {
     markerBounds.extend(markers[i].getPosition());
   }
   map.fitBounds(markerBounds);
+
+  // createMarkers() creates some DOM that has KO bindings.
+  ko.applyBindings(new app.AppViewModel());
 };
 
 app.AppViewModel = function() {
@@ -96,8 +110,19 @@ app.AppViewModel = function() {
     }
     return true;
   }
+
+  this.locationClicked = function(index, data, event) {
+    var clickedLocation = event.target;
+    // Remove 'selected' style from previous selected location DOM element.
+    if (app.locationSelected != null &&
+        app.locationSelected != clickedLocation) {
+      $(app.locationSelected).removeClass('selected');
+    }
+    $(clickedLocation).addClass('selected');
+    app.locationSelected = clickedLocation;
+    google.maps.event.trigger(app.markers[index], 'click');
+  }
 }
-ko.applyBindings(new app.AppViewModel());
 
 // Init menu icon when document DOM is ready.
 $(document).ready(function() {

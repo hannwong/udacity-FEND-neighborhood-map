@@ -28,8 +28,10 @@ app.mapData = {
   ]
 };
 
+app.markers = [];
+
 app.createMarkers = function(map) {
-  var markers = [];
+  var markers = app.markers = [];
   for (var i = 0; i < app.mapData.locations.length; i++) {
     var marker = new google.maps.Marker({
       position: app.mapData.locations[i].latlng,
@@ -70,6 +72,32 @@ app.initMap = function() {
   }
   map.fitBounds(markerBounds);
 };
+
+app.AppViewModel = function() {
+  this.filter = ko.observable("");
+
+  this.filterLocations = function() {
+    var filterText = this.filter().toUpperCase();
+    $('div.locations div').each(function(index) {
+      if ($(this).html().toUpperCase().indexOf(filterText) == -1) {
+        $(this).addClass('hidden');
+        app.markers[index].setVisible(false);
+      }
+      else {
+        $(this).removeClass('hidden');
+        app.markers[index].setVisible(true);
+      }
+    });
+  };
+
+  this.filterFieldKeyPressed = function(data, event) {
+    if (event.keyCode == 13) {
+      this.filterLocations();
+    }
+    return true;
+  }
+}
+ko.applyBindings(new app.AppViewModel());
 
 // Init menu icon when document DOM is ready.
 $(document).ready(function() {

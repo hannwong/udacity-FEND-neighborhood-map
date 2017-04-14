@@ -82,4 +82,8 @@ button {
   padding: 1em 1em;
 }
 
+.locations div.hidden {
+  display: none;
+}
+
 #map { height: 100%; }

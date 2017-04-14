@@ -29,8 +29,10 @@
 
   <nav id="drawer" class="nav">
     <div class="location_filter">
-      <input class="location_filter"></input>
-      <button class="location_filter">
+      <input class="location_filter"
+             data-bind="value: filter, valueUpdate: 'keypress', event: { keypress: filterFieldKeyPressed}">
+      </input>
+      <button class="location_filter" data-bind="click: filterLocations">
         <svg class="filter"><use xlink:href="#filter"/></svg>
         Filter
       </button>

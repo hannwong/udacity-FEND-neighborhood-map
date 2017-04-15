@@ -28,11 +28,6 @@ svg.filter {
   fill: white;
 }
 
-div.location_filter {
-  height: 48px;
-  border: 1px solid #406da0;
-}
-
 input {
   display: block;
   float: left;
@@ -55,10 +50,13 @@ button {
   color: white;
 }
 
-.nav {
+div.location_filter {
   z-index: 10;
   background-color: #ffffff; /* Computed value is black. Best set this. */
   max-width: 80vw;
+
+  height: 48px;
+  border: 1px solid #406da0;
 
   /* Default 'top' and 'left' as per 'static': right below header, and 0. */
   position: absolute;
@@ -66,13 +64,27 @@ button {
   transform: translate(-300px, 0);
   transition: transform 0.3s ease;
 }
-.nav.open {
+
+div.location_filter.open, .locations.open {
   transform: translate(0, 0);
 }
+
 .locations {
+  z-index: 10;
   overflow: scroll;
   max-height: 80vh;
+  max-width: 80vw;
+  background-color: #ffffff; /* Computed value is black. Best set this. */
+
+  opacity: 0.7;
+
+  position: absolute;
+  top: calc(48px * 2);
+
+  transform: translate(-300px, 0);
+  transition: transform 0.3s ease;
 }
+
 .locations div {
   border-bottom: 1px solid #ffffff; /* Separator. */
   color: white;

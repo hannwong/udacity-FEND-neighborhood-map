@@ -27,19 +27,17 @@
       </a>
   </header>
 
-  <nav id="drawer" class="nav">
-    <div class="location_filter">
-      <input class="location_filter"
-             data-bind="value: filter, valueUpdate: 'keypress', event: { keypress: filterFieldKeyPressed}">
+  <div class="location_filter">
+    <input class="location_filter"
+           data-bind="value: filter, valueUpdate: 'keypress', event: { keypress: filterFieldKeyPressed}">
       </input>
       <button class="location_filter" data-bind="click: filterLocations">
         <svg class="filter"><use xlink:href="#filter"/></svg>
         Filter
       </button>
-    </div>
-    <div class="locations">
-    </div>
-  </nav>
+  </div>
+  <div class="locations">
+  </div>
 
   <div id="map"></div>
 

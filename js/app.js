@@ -93,6 +93,10 @@ app.initMap = function() {
 
   // createMarkers() creates some DOM that has KO bindings.
   ko.applyBindings(new app.AppViewModel());
+
+  // Match width of location list to textfield. +2 to account for border.
+  var width = $('div.location_filter').width() + 2;
+  $('div.locations').width(width);
 };
 
 app.AppViewModel = function() {
@@ -102,6 +106,11 @@ app.AppViewModel = function() {
     var filterText = this.filter().toUpperCase();
     $('div.locations div').each(function(index) {
       if ($(this).html().toUpperCase().indexOf(filterText) == -1) {
+        // Unselect this div before hiding, if it was selected.
+        if (this == app.locationSelected) {
+          $(this).trigger("click");
+        }
+
         $(this).addClass('hidden');
         app.markers[index].setVisible(false);
       }
@@ -151,18 +160,22 @@ app.AppViewModel = function() {
 $(document).ready(function() {
   var menu = document.querySelector('#menu');
   var body = document.querySelector('body');
-  var drawer = document.querySelector('.nav');
+  var locationFilter = document.querySelector('div.location_filter');
+  var locationList = document.querySelector('div.locations');
 
   // Opens when hamburger icon is clicked.
   menu.addEventListener('click', function(e) {
-    drawer.classList.toggle('open');
+    locationFilter.classList.toggle('open');
+    locationList.classList.toggle('open');
     e.stopPropagation();
   });
   // Closes when any part of 'body' is clicked.
   body.addEventListener('click', function(e) {
     if (e.target != document.querySelector('input.location_filter') &&
         e.target != document.querySelector('button.location_filter') &&
-        e.target.parentNode != document.querySelector('div.locations'))
-      drawer.classList.remove('open');
+        e.target.parentNode != document.querySelector('div.locations')) {
+      locationFilter.classList.remove('open');
+      locationList.classList.remove('open');
+    }
   });
 });

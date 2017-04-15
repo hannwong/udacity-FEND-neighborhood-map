@@ -55,14 +55,22 @@ app.createMarkers = function(map) {
     (function(infoWindow, marker, map) {
       marker.addListener('click', function() {
         // Stop animation for last selected marker.
-        if (app.markerSelected != null &&
-            app.markerSelected != marker) {
+        if (app.markerSelected != null) {
           app.markerSelected.setAnimation(null);
         }
-        app.markerSelected = marker;
-        infoWindow.setContent(marker.title);
-        infoWindow.open(map, marker);
-        marker.setAnimation(google.maps.Animation.BOUNCE);
+
+        if (app.markerSelected == marker) {
+          // Unselecting
+          app.markerSelected = null;
+          infoWindow.close();
+        }
+        else {
+          // Selecting (a new marker)
+          app.markerSelected = marker;
+          infoWindow.setContent(marker.title);
+          infoWindow.open(map, marker);
+          marker.setAnimation(google.maps.Animation.BOUNCE);
+        }
       });
     })(infoWindow, markers[i], map);
   }
@@ -111,15 +119,30 @@ app.AppViewModel = function() {
     return true;
   }
 
+  /**
+   * Clicking on a selected location unselects it.
+   * Note how this mirrors exactly the listener for selecting/unselecting markers.
+   * (Listener defined in app.createMarkers())
+   */
   this.locationClicked = function(index, data, event) {
     var clickedLocation = event.target;
+
     // Remove 'selected' style from previous selected location DOM element.
-    if (app.locationSelected != null &&
-        app.locationSelected != clickedLocation) {
+    if (app.locationSelected != null) {
       $(app.locationSelected).removeClass('selected');
     }
-    $(clickedLocation).addClass('selected');
-    app.locationSelected = clickedLocation;
+
+    if (app.locationSelected == clickedLocation) {
+      // Unselecting
+      app.locationSelected = null;
+    }
+    else {
+      // Selecting (a new location)
+      app.locationSelected = clickedLocation;
+      $(clickedLocation).addClass('selected');
+    }
+
+    // Trigger click on marker.
     google.maps.event.trigger(app.markers[index], 'click');
   }
 }

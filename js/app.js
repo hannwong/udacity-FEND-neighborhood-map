@@ -43,27 +43,34 @@ app.createMarkers = function(map) {
   });
 
   for (var i = 0; i < markers.length; i++) {
-    (function(infoWindow, marker, map) {
+    (function(infoWindow, marker, map, index) {
       marker.addListener('click', function() {
         // Stop animation for last selected marker.
         if (app.markerSelected != null) {
           app.markerSelected.setAnimation(null);
+          // Unselect last selected location too.
+          app.mapData.locations[app.locationSelected].selected(false);
         }
 
         if (app.markerSelected == marker) {
           // Unselecting
           app.markerSelected = null;
+          app.locationSelected = null;
           infoWindow.close();
         }
         else {
-          // Selecting (a new marker)
+          // Selecting (a new location)
           app.markerSelected = marker;
+          marker.setAnimation(google.maps.Animation.BOUNCE);
+          app.locationSelected = index;
+          app.mapData.locations[index].selected(true);
+
+          // Open infoWindow at selected marker.
           infoWindow.setContent(marker.title);
           infoWindow.open(map, marker);
-          marker.setAnimation(google.maps.Animation.BOUNCE);
         }
       });
-    })(infoWindow, markers[i], map);
+    })(infoWindow, markers[i], map, i);
   }
 
   return markers;

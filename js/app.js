@@ -24,11 +24,11 @@ app.mapData = {
     zoom: 15
   },
   locations: [
-    new app.Location("Downtown East", {lat: 1.376684, lng: 103.954890}),
-    new app.Location("Fishing Pond", {lat: 1.371890, lng: 103.952218}),
-    new app.Location("Pasir Ris Subway Station", {lat: 1.373435, lng: 103.949450}),
-    new app.Location("Pasir Ris Sports Centre", {lat: 1.374428, lng: 103.951986}),
-    new app.Location("Pasir Ris Beach", {lat: 1.383931, lng: 103.947114})
+    new app.Location("Downtown East", {lat: 1.376386, lng: 103.954857}),
+    new app.Location("Fishing Pond", {lat: 1.371507, lng: 103.952228}),
+    new app.Location("Pasir Ris Subway Station", {lat: 1.373104, lng: 103.949435}),
+    new app.Location("Pasir Ris Sports Centre", {lat: 1.374292, lng: 103.951975}),
+    new app.Location("Pasir Ris Beach", {lat: 1.383694, lng: 103.947102})
   ]
 };
 
@@ -133,7 +133,61 @@ app.AppViewModel = function() {
       // Open infoWindow at selected marker.
       infoWindow.setContent(location.name);
       infoWindow.open(map, location.marker);
+
+      // Pull in more info from Foursquare.
+      self.callFoursquare(location);
     }
+  }
+
+  self.callFoursquare = function(location) {
+    var infoWindow = app.infoWindow;
+    var content = '<center>' + infoWindow.getContent() + '</center>';
+
+    // Use Foursquare. Get official venue name, contact info.
+    var endpoint = 'https://api.foursquare.com/v2/venues/search'
+    var data = {
+      ll: location.latlng.lat + ',' + location.latlng.lng,
+      client_id: 'DWY4APYOJTPFZRYOKFWOEHLE2Q2XJDMM44YL4PLSSGAH0VQL',
+      client_secret: 'PBGWQRBUBIIZBIRWD2HNL2HHMVYMJNJR3BGSK2VVJV5WAZNO',
+      v: '20170416'
+    };
+    $.getJSON(endpoint, data, function(data) {
+      // Take 1st venue. It's the most accurate.
+      // Prefer formatted phone number. Add to infoWindow.
+      var venue = null;
+      if (data.response.venues.length > 0) {
+        venue = data.response.venues[0];
+      }
+
+      console.log(data.response.venues);
+
+      if (venue == null) {
+        content += '<br>No Foursquare venue here';
+        infoWindow.setContent(content);
+        return;
+      }
+
+      content += '<br><b>Official venue name</b>:<br>' + venue.name + '<br>';
+
+      if (Object.keys(venue.contact).length <= 0) {
+        content += '<br>No contact info found';
+        infoWindow.setContent(content);
+        return;
+      }
+
+      if (venue.contact.formattedPhone) {
+        content += '<br>Phone: ' + venue.contact.formattedPhone;
+      }
+      else {
+        var key = Object.keys(venue.contact)[0];
+        content += '<br>' + key + ': ' + venue.contact[key];
+      }
+      infoWindow.setContent(content);
+    }).fail(function(jqxhr, textStatus, error) {
+      var err = textStatus + ", " + error;
+      content += '<br>Unable to contact Foursquare<br>' + err;
+      infoWindow.setContent(content);
+    });
   }
 
   // Creates markers, listeners, and the listeners to markers.

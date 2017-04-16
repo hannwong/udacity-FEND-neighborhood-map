@@ -104,4 +104,11 @@ div.location_filter.open, .locations.open {
   display: none;
 }
 
-#map { height: 100%; }
+#map {
+  height: 90%;
+}
+
+footer {
+  font-size: 0.8em;
+  padding: 0 1em;
+}

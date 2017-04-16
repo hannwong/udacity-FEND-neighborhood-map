@@ -144,11 +144,13 @@ app.AppViewModel = function() {
     if (app.locationSelected == clickedLocation) {
       // Unselecting
       app.locationSelected = null;
+      $('div.locations').removeClass('selected');
     }
     else {
       // Selecting (a new location)
       app.locationSelected = clickedLocation;
       $(clickedLocation).addClass('selected');
+      $('div.locations').addClass('selected');
     }
 
     // Trigger click on marker.

@@ -33,57 +33,17 @@ app.mapData = {
 };
 
 app.locationSelected = null; // index into app.mapData.locations
+app.map = null; // Google map
+app.infoWindow = null; // Use only 1 instance of InfoWindow
 
-app.createMarkers = function(map) {
-  // Use only 1 instance of InfoWindow
-  var infoWindow = new google.maps.InfoWindow({
+app.initMap = function() {
+  app.map = new google.maps.Map($('#map')[0]);
+
+  app.infoWindow = new google.maps.InfoWindow({
     content: ''
   });
 
-  for (var i = 0; i < app.mapData.locations.length; i++) {
-    var location = app.mapData.locations[i];
-
-    // Create Google Map marker.
-    location.createMarker(map);
-
-    // Create marker listener.
-    (function(map, index) {
-      var locations = app.mapData.locations;
-      var marker = locations[index].marker;
-
-      marker.addListener('click', function() {
-        // Stop animation for last selected marker.
-        if (app.locationSelected != null) {
-          locations[app.locationSelected].marker.setAnimation(null);
-          // Unselect last selected location too.
-          locations[app.locationSelected].selected(false);
-        }
-
-        if (app.locationSelected == index) {
-          // Unselecting
-          app.locationSelected = null;
-          infoWindow.close();
-        }
-        else {
-          // Selecting (a new location)
-          app.locationSelected = index;
-          marker.setAnimation(google.maps.Animation.BOUNCE);
-          locations[index].selected(true);
-
-          // Open infoWindow at selected marker.
-          infoWindow.setContent(marker.title);
-          infoWindow.open(map, marker);
-        }
-      });
-    })(map, i);
-  }
-};
-
-app.initMap = function() {
-  var map;
-  map = new google.maps.Map($('#map')[0]);
-
-  app.createMarkers(map);
+  ko.applyBindings(new app.AppViewModel());
 
   var locations = app.mapData.locations;
 
@@ -92,10 +52,7 @@ app.initMap = function() {
   for (var i = 0; i < locations.length; i++) {
     markerBounds.extend(locations[i].marker.getPosition());
   }
-  map.fitBounds(markerBounds);
-
-  // createMarkers() creates some DOM that has KO bindings.
-  ko.applyBindings(new app.AppViewModel());
+  app.map.fitBounds(markerBounds);
 
   // Match width of location list to textfield. +2 to account for border.
   var width = $('div.location_filter').width() + 2;
@@ -149,10 +106,13 @@ app.AppViewModel = function() {
 
   /**
    * Clicking on a selected location unselects it.
-   * Note how this mirrors exactly the listener for selecting/unselecting markers.
-   * (Listener defined in app.createMarkers())
+   * Note how this function is used for both marker and DOM listeners.
+   * (See self.attachMarkerListeners())
    */
   self.locationClicked = function(index) {
+    var infoWindow = app.infoWindow, map = app.map;
+    var location = self.locations[index];
+
     // Set 'selected' to false for previous selected location.
     if (app.locationSelected != null) {
       self.locations[app.locationSelected].selected(false);
@@ -162,14 +122,37 @@ app.AppViewModel = function() {
     if (app.locationSelected == index) {
       // Unselecting
       app.locationSelected = null;
+      infoWindow.close();
     }
     else {
       // Selecting (a new location)
       app.locationSelected = index;
-      self.locations[index].selected(true);
-      self.locations[index].marker.setAnimation(google.maps.Animation.BOUNCE);
+      location.selected(true);
+      location.marker.setAnimation(google.maps.Animation.BOUNCE);
+
+      // Open infoWindow at selected marker.
+      infoWindow.setContent(location.name);
+      infoWindow.open(map, location.marker);
     }
   }
+
+  // Creates markers, listeners, and the listeners to markers.
+  self.createMarkers = function() {
+    var map = app.map, infoWindow = app.infoWindow;
+    for (var i = 0; i < self.locations.length; i++) {
+      var location = self.locations[i];
+
+      // Create the Google Map marker.
+      location.createMarker(map);
+
+      // Create the listener and attach it to the marker.
+      (function(index) {
+        var marker = self.locations[index].marker;
+        marker.addListener('click', self.locationClicked.bind(self, index));
+      })(i);
+    }
+  }
+  self.createMarkers();
 }
 
 // Init menu icon when document DOM is ready.

@@ -22,7 +22,7 @@ app.mapData = {
   ]
 };
 
-app.markers = [];
+app.markers = []; // Array of Google Map markers. TODO: put inside app.Location
 app.markerSelected = null; // Google Maps marker
 app.locationSelected = null; // index into app.mapData.locations
 
@@ -91,15 +91,16 @@ app.initMap = function() {
 };
 
 app.AppViewModel = function() {
-  this.filter = ko.observable("");
-  // Each '.locations div' binds to a location in this array...
-  this.locations = app.mapData.locations;
-  generateLocationsDOM(this.locations); // Like so here.
-  // Only true when any location in this.locations is selected.
-  this.locationsListSelected = ko.computed(function() {
+  var self = this;
+
+  self.filter = ko.observable("");
+  // Each '.locations div' binds to a location in this array.
+  self.locations = app.mapData.locations;
+  // Only true when any location in self.locations is selected.
+  self.locationsListSelected = ko.computed(function() {
     var value = false;
-    for (var i = 0; i < this.locations.length; i++){
-      if (this.locations[i].selected() == true) {
+    for (var i = 0; i < self.locations.length; i++){
+      if (self.locations[i].selected() == true) {
         value = true;
         break;
       }
@@ -107,11 +108,11 @@ app.AppViewModel = function() {
     return value;
   }, this);
 
-  this.filterLocations = function() {
-    var filterText = this.filter().toUpperCase();
+  self.filterLocations = function() {
+    var filterText = self.filter().toUpperCase();
 
-    for (var i = 0; i < this.locations.length; i++) {
-      var location = this.locations[i];
+    for (var i = 0; i < self.locations.length; i++) {
+      var location = self.locations[i];
       if (location.name.toUpperCase().indexOf(filterText) == -1) {
         // Unselect this location before hiding, if it was selected.
         if (i == app.locationSelected) {
@@ -127,9 +128,9 @@ app.AppViewModel = function() {
     }
   };
 
-  this.filterFieldKeyPressed = function(data, event) {
+  self.filterFieldKeyPressed = function(data, event) {
     if (event.keyCode == 13) {
-      this.filterLocations();
+      self.filterLocations();
     }
     return true;
   }
@@ -139,10 +140,10 @@ app.AppViewModel = function() {
    * Note how this mirrors exactly the listener for selecting/unselecting markers.
    * (Listener defined in app.createMarkers())
    */
-  this.locationClicked = function(index) {
+  self.locationClicked = function(index) {
     // Set 'selected' to false for previous selected location.
     if (app.locationSelected != null) {
-      this.locations[app.locationSelected].selected(false);
+      self.locations[app.locationSelected].selected(false);
     }
 
     if (app.locationSelected == index) {
@@ -152,33 +153,12 @@ app.AppViewModel = function() {
     else {
       // Selecting (a new location)
       app.locationSelected = index;
-      this.locations[index].selected(true);
+      self.locations[index].selected(true);
     }
 
     // Trigger click on marker.
     google.maps.event.trigger(app.markers[index], 'click');
   }
-
-  /**
-   * Technically, this should be in View. But there's no way to put this
-   * dynamically generated HTML in the .html file. So it's here for now.
-   */
-  function generateLocationsDOM(locations) {
-    var locationsList = $('div.locations');
-    for (var i = 0; i < locations.length; i++) {
-      var location = locations[i];
-      var clickBinding = 'click: locationClicked.bind($data, ' + i + ')';
-      var cssBinding = 'css: { ' +
-          'selected: locations[' + i + '].selected(), ' +
-          'hidden: locations[' + i + '].hidden()' +
-          '}';
-
-      var locationDiv = '<div data-bind="' +
-          clickBinding + ', ' + cssBinding + '">' + location.name + '</div>';
-
-      locationsList.append(locationDiv);
-    }
-  };
 }
 
 // Init menu icon when document DOM is ready.

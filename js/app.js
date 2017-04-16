@@ -6,6 +6,16 @@ app.Location = function(name, latlng) {
   self.latlng = latlng;
   self.hidden = ko.observable(false);
   self.selected = ko.observable(false);
+
+  self.marker = null; // Google Map marker. See createMarker().
+
+  self.createMarker = function(map) {
+    self.marker = new google.maps.Marker({
+      position: self.latlng,
+      map: map,
+      title: self.name
+    });
+  };
 };
 
 app.mapData = {
@@ -22,70 +32,65 @@ app.mapData = {
   ]
 };
 
-app.markers = []; // Array of Google Map markers. TODO: put inside app.Location
-app.markerSelected = null; // Google Maps marker
 app.locationSelected = null; // index into app.mapData.locations
 
 app.createMarkers = function(map) {
-  var markers = app.markers = [];
-  for (var i = 0; i < app.mapData.locations.length; i++) {
-    var marker = new google.maps.Marker({
-      position: app.mapData.locations[i].latlng,
-      map: map,
-      title: app.mapData.locations[i].name
-    });
-    markers.push(marker);
-  }
-
   // Use only 1 instance of InfoWindow
   var infoWindow = new google.maps.InfoWindow({
     content: ''
   });
 
-  for (var i = 0; i < markers.length; i++) {
-    (function(infoWindow, marker, map, index) {
+  for (var i = 0; i < app.mapData.locations.length; i++) {
+    var location = app.mapData.locations[i];
+
+    // Create Google Map marker.
+    location.createMarker(map);
+
+    // Create marker listener.
+    (function(map, index) {
+      var locations = app.mapData.locations;
+      var marker = locations[index].marker;
+
       marker.addListener('click', function() {
         // Stop animation for last selected marker.
-        if (app.markerSelected != null) {
-          app.markerSelected.setAnimation(null);
+        if (app.locationSelected != null) {
+          locations[app.locationSelected].marker.setAnimation(null);
           // Unselect last selected location too.
-          app.mapData.locations[app.locationSelected].selected(false);
+          locations[app.locationSelected].selected(false);
         }
 
-        if (app.markerSelected == marker) {
+        if (app.locationSelected == index) {
           // Unselecting
-          app.markerSelected = null;
           app.locationSelected = null;
           infoWindow.close();
         }
         else {
           // Selecting (a new location)
-          app.markerSelected = marker;
-          marker.setAnimation(google.maps.Animation.BOUNCE);
           app.locationSelected = index;
-          app.mapData.locations[index].selected(true);
+          marker.setAnimation(google.maps.Animation.BOUNCE);
+          locations[index].selected(true);
 
           // Open infoWindow at selected marker.
           infoWindow.setContent(marker.title);
           infoWindow.open(map, marker);
         }
       });
-    })(infoWindow, markers[i], map, i);
+    })(map, i);
   }
-
-  return markers;
 };
 
 app.initMap = function() {
   var map;
   map = new google.maps.Map($('#map')[0]);
 
-  markers = app.createMarkers(map);
+  app.createMarkers(map);
+
+  var locations = app.mapData.locations;
 
   // Center and zoom map to fit all markers.
   var markerBounds = new google.maps.LatLngBounds();
-  for (var i = 0; i < markers.length; i++) {
-    markerBounds.extend(markers[i].getPosition());
+  for (var i = 0; i < locations.length; i++) {
+    markerBounds.extend(locations[i].marker.getPosition());
   }
   map.fitBounds(markerBounds);
 
@@ -113,7 +118,7 @@ app.AppViewModel = function() {
       }
     }
     return value;
-  }, this);
+  }, self);
 
   self.filterLocations = function() {
     var filterText = self.filter().toUpperCase();
@@ -126,11 +131,11 @@ app.AppViewModel = function() {
           $('.locations div').eq(i).trigger('click');
         }
         location.hidden(true);
-        app.markers[i].setVisible(false);
+        location.marker.setVisible(false);
       }
       else {
         location.hidden(false);
-        app.markers[i].setVisible(true);
+        location.marker.setVisible(true);
       }
     }
   };
@@ -151,6 +156,7 @@ app.AppViewModel = function() {
     // Set 'selected' to false for previous selected location.
     if (app.locationSelected != null) {
       self.locations[app.locationSelected].selected(false);
+      self.locations[app.locationSelected].marker.setAnimation(null);
     }
 
     if (app.locationSelected == index) {
@@ -161,10 +167,8 @@ app.AppViewModel = function() {
       // Selecting (a new location)
       app.locationSelected = index;
       self.locations[index].selected(true);
+      self.locations[index].marker.setAnimation(google.maps.Animation.BOUNCE);
     }
-
-    // Trigger click on marker.
-    google.maps.event.trigger(app.markers[index], 'click');
   }
 }
 

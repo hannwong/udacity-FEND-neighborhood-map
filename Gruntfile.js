@@ -48,6 +48,10 @@ module.exports = function(grunt) {
           }
         ]
       }
+    },
+
+    jshint: {
+      all: ['Gruntfile.js', 'js/**/*.js']
     }
   });
 
@@ -55,6 +59,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-mkdir');
   grunt.loadNpmTasks('grunt-contrib-sass');
-  grunt.registerTask('default', ['clean:dev', 'mkdir:dev', 'sass']);
+  grunt.loadNpmTasks('grunt-contrib-jshint');
+  grunt.registerTask('default', ['jshint', 'clean:dev', 'mkdir:dev', 'sass']);
   grunt.registerTask('dist', ['default', 'mkdir:dist', 'copy:dist']);
 };

@@ -1,4 +1,4 @@
-var app = app || {}
+var app = app || {};
 
 app.Location = function(name, latlng) {
   var self = this;
@@ -69,7 +69,7 @@ app.AppViewModel = function() {
   self.locationsListSelected = ko.computed(function() {
     var value = false;
     for (var i = 0; i < self.locations.length; i++){
-      if (self.locations[i].selected() == true) {
+      if (self.locations[i].selected() === true) {
         value = true;
         break;
       }
@@ -102,7 +102,7 @@ app.AppViewModel = function() {
       self.filterLocations();
     }
     return true;
-  }
+  };
 
   /**
    * Clicking on a selected location unselects it.
@@ -114,7 +114,7 @@ app.AppViewModel = function() {
     var location = self.locations[index];
 
     // Set 'selected' to false for previous selected location.
-    if (app.locationSelected != null) {
+    if (app.locationSelected !== null) {
       self.locations[app.locationSelected].selected(false);
       self.locations[app.locationSelected].marker.setAnimation(null);
     }
@@ -137,14 +137,14 @@ app.AppViewModel = function() {
       // Pull in more info from Foursquare.
       self.callFoursquare(location);
     }
-  }
+  };
 
   self.callFoursquare = function(location) {
     var infoWindow = app.infoWindow;
     var content = '<center>' + infoWindow.getContent() + '</center>';
 
     // Use Foursquare. Get official venue name, contact info.
-    var endpoint = 'https://api.foursquare.com/v2/venues/search'
+    var endpoint = 'https://api.foursquare.com/v2/venues/search';
     var data = {
       ll: location.latlng.lat + ',' + location.latlng.lng,
       client_id: 'DWY4APYOJTPFZRYOKFWOEHLE2Q2XJDMM44YL4PLSSGAH0VQL',
@@ -161,7 +161,7 @@ app.AppViewModel = function() {
 
       console.log(data.response.venues);
 
-      if (venue == null) {
+      if (venue === null) {
         content += '<br>No Foursquare venue here';
         infoWindow.setContent(content);
         return;
@@ -188,11 +188,16 @@ app.AppViewModel = function() {
       content += '<br>Unable to contact Foursquare<br>' + err;
       infoWindow.setContent(content);
     });
-  }
+  };
+
+  self.createMarker = function(index) {
+    var marker = self.locations[index].marker;
+    marker.addListener('click', self.locationClicked.bind(self, index));
+  };
 
   // Creates markers, listeners, and the listeners to markers.
   self.createMarkers = function() {
-    var map = app.map, infoWindow = app.infoWindow;
+    var map = app.map;
     for (var i = 0; i < self.locations.length; i++) {
       var location = self.locations[i];
 
@@ -200,14 +205,11 @@ app.AppViewModel = function() {
       location.createMarker(map);
 
       // Create the listener and attach it to the marker.
-      (function(index) {
-        var marker = self.locations[index].marker;
-        marker.addListener('click', self.locationClicked.bind(self, index));
-      })(i);
+      self.createMarker(i);
     }
-  }
+  };
   self.createMarkers();
-}
+};
 
 // Init menu icon when document DOM is ready.
 $(document).ready(function() {

@@ -35,6 +35,7 @@ app.mapData = {
 app.locationSelected = null; // index into app.mapData.locations
 app.map = null; // Google map
 app.infoWindow = null; // Use only 1 instance of InfoWindow
+app.mapBounds = null; // Calculated once, includes all markers.
 
 app.initMap = function() {
   app.map = new google.maps.Map($('#map')[0]);
@@ -48,11 +49,16 @@ app.initMap = function() {
   var locations = app.mapData.locations;
 
   // Center and zoom map to fit all markers.
-  var markerBounds = new google.maps.LatLngBounds();
+  app.mapBounds = new google.maps.LatLngBounds();
   for (var i = 0; i < locations.length; i++) {
-    markerBounds.extend(locations[i].marker.getPosition());
+    app.mapBounds.extend(locations[i].marker.getPosition());
   }
-  app.map.fitBounds(markerBounds);
+  app.map.fitBounds(app.mapBounds);
+
+  // Re-fit to bounds upon window resize.
+  google.maps.event.addDomListener(window, 'resize', function() {
+    app.map.fitBounds(app.mapBounds);
+  });
 
   // Match width of location list to textfield. +2 to account for border.
   var width = $('div.location_filter').width() + 2;
@@ -158,8 +164,6 @@ app.AppViewModel = function() {
       if (data.response.venues.length > 0) {
         venue = data.response.venues[0];
       }
-
-      console.log(data.response.venues);
 
       if (venue === null) {
         content += '<br>No Foursquare venue here';

@@ -8,9 +8,6 @@ html, body {
 
 header {
   background-color: 7f7f7f;
-}
-
-header {
   text-align: right;
 }
 
@@ -111,10 +108,11 @@ div.location_filter {
 }
 
 #map {
-  height: 90%;
+  height: calc(100% - 48px - 1em);
 }
 
 footer {
   font-size: 0.8em;
   padding: 0 1em;
+  max-height: 1em;
 }

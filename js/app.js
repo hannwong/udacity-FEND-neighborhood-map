@@ -91,7 +91,7 @@ app.AppViewModel = function() {
       if (location.name.toUpperCase().indexOf(filterText) == -1) {
         // Unselect this location before hiding, if it was selected.
         if (i == app.locationSelected) {
-          $('.locations div').eq(i).trigger('click');
+          self.unselectLocation(i);
         }
         location.hidden(true);
         location.marker.setVisible(false);
@@ -110,38 +110,47 @@ app.AppViewModel = function() {
     return true;
   };
 
+  self.unselectLocation = function(index) {
+    var infoWindow = app.infoWindow;
+    var location = self.locations[index];
+    location.selected(false);
+    location.marker.setAnimation(null);
+    infoWindow.close();
+  };
+
+  self.selectLocation = function(index) {
+    var infoWindow = app.infoWindow, map = app.map;
+    var location = self.locations[index];
+    app.locationSelected = index;
+    location.selected(true);
+    location.marker.setAnimation(google.maps.Animation.BOUNCE);
+
+    // Open infoWindow at selected marker.
+    infoWindow.setContent(location.name);
+    infoWindow.open(map, location.marker);
+
+    // Pull in more info from Foursquare.
+    self.callFoursquare(location);
+  };
+
   /**
    * Clicking on a selected location unselects it.
    * Note how this function is used for both marker and DOM listeners.
    * (See self.attachMarkerListeners())
    */
   self.locationClicked = function(index) {
-    var infoWindow = app.infoWindow, map = app.map;
-    var location = self.locations[index];
-
     // Set 'selected' to false for previous selected location.
     if (app.locationSelected !== null) {
-      self.locations[app.locationSelected].selected(false);
-      self.locations[app.locationSelected].marker.setAnimation(null);
+      self.unselectLocation(app.locationSelected);
     }
 
     if (app.locationSelected == index) {
       // Unselecting
       app.locationSelected = null;
-      infoWindow.close();
     }
     else {
       // Selecting (a new location)
-      app.locationSelected = index;
-      location.selected(true);
-      location.marker.setAnimation(google.maps.Animation.BOUNCE);
-
-      // Open infoWindow at selected marker.
-      infoWindow.setContent(location.name);
-      infoWindow.open(map, location.marker);
-
-      // Pull in more info from Foursquare.
-      self.callFoursquare(location);
+      self.selectLocation(index);
     }
   };
 

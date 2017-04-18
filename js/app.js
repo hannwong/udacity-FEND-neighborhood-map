@@ -96,6 +96,7 @@ app.AppViewModel = function() {
 
   self.hideLocationsList = function(data, e) {
     self.locationsListVisible(false);
+    return true;
   };
 
   self.filterLocations = function() {

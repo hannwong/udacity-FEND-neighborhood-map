@@ -8,7 +8,7 @@
   <!-- styles put here, but you can include a CSS file and reference it instead! -->
   <link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
-<body>
+<body data-bind="click: hideLocationsList">
   <svg style="display: none;">
     <defs>
       <!-- https://www.iconfinder.com/icons/134216/hamburger_lines_menu_icon -->
@@ -22,24 +22,30 @@
     </defs>
   </svg>
   <header>
-      <a id="menu" class="header__menu">
-        <svg class="hamburger"><use xlink:href="#hamburger"/></svg>
-      </a>
+    <a id="menu" class="header__menu"
+       data-bind="click: showHideLocationsList, clickBubble: false">
+      <svg class="hamburger"><use xlink:href="#hamburger"/></svg>
+    </a>
   </header>
 
-  <div class="location_filter">
+  <div class="location_filter"
+       data-bind="css: { open: locationsListVisible() }">
     <input class="location_filter"
-           data-bind="value: filter, valueUpdate: 'keypress', event: { keypress: filterFieldKeyPressed}">
+           data-bind="value: filter, valueUpdate: 'keypress',
+                      event: { keypress: filterFieldKeyPressed, click: function() {return false;} },
+                      clickBubble: false">
       </input>
-      <button class="location_filter" data-bind="click: filterLocations">
+      <button class="location_filter" data-bind="click: filterLocations , clickBubble: false">
         <svg class="filter"><use xlink:href="#filter"/></svg>
         Filter
       </button>
   </div>
-  <div class="locations" data-bind="css: { selected: locationsListSelected() },
-                                    foreach: locations">
+  <div class="locations"
+       data-bind="css: { selected: locationsListSelected(), open: locationsListVisible() },
+                  foreach: locations">
     <div data-bind="click: $parent.locationClicked.bind($parent, $index()),
                     css: { selected: selected(), hidden: hidden() },
+                    clickBubble: false,
                     text: name"></div>
   </div>
 

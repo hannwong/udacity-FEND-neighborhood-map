@@ -83,6 +83,21 @@ app.AppViewModel = function() {
     return value;
   }, self);
 
+  // Visibility state for both the input field and the locations list.
+  self.locationsListVisible = ko.observable(false);
+
+  self.showHideLocationsList = function() {
+    if (self.locationsListVisible() === true)
+      self.locationsListVisible(false);
+    else {
+      self.locationsListVisible(true);
+    }
+  };
+
+  self.hideLocationsList = function(data, e) {
+    self.locationsListVisible(false);
+  };
+
   self.filterLocations = function() {
     var filterText = self.filter().toUpperCase();
 
@@ -223,27 +238,3 @@ app.AppViewModel = function() {
   };
   self.createMarkers();
 };
-
-// Init menu icon when document DOM is ready.
-$(document).ready(function() {
-  var menu = document.querySelector('#menu');
-  var body = document.querySelector('body');
-  var locationFilter = document.querySelector('div.location_filter');
-  var locationList = document.querySelector('div.locations');
-
-  // Opens when hamburger icon is clicked.
-  menu.addEventListener('click', function(e) {
-    locationFilter.classList.toggle('open');
-    locationList.classList.toggle('open');
-    e.stopPropagation();
-  });
-  // Closes when any part of 'body' is clicked.
-  body.addEventListener('click', function(e) {
-    if (e.target != document.querySelector('input.location_filter') &&
-        e.target != document.querySelector('button.location_filter') &&
-        e.target.parentNode != document.querySelector('div.locations')) {
-      locationFilter.classList.remove('open');
-      locationList.classList.remove('open');
-    }
-  });
-});

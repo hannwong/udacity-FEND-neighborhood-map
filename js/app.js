@@ -238,3 +238,14 @@ app.AppViewModel = function() {
   };
   self.createMarkers();
 };
+
+app.googleMapLoadErrorHandler = function(e) {
+  $('#map')[0].innerHTML = '<p>Error loading Google Maps!</p>' +
+    '<p>Try checking your internet connection?</p>' +
+    '<p>Or try again later?</p>';
+};
+
+function gm_authFailure() {
+  $('#map')[0].innerHTML = '<p>Error loading Google Maps API!</p>' +
+    '<p>Please notify us about this!</p>';
+}
